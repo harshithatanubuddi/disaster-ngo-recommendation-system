@@ -1,0 +1,4 @@
+[build]
+  base = "disaster-ngo-frontend"
+  publish = "."
+  command = ""
