@@ -6,3 +6,4 @@ python-dotenv
 geoalchemy2
 shapely
 requests
+feedparser
