@@ -10,6 +10,7 @@ app = FastAPI(title="Disaster–NGO Decision Support System")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://animated-palmier-dfd2ce.netlify.app",
         "http://127.0.0.1:5500",
         "http://localhost:5500",
     ],
