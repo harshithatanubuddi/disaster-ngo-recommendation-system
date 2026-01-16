@@ -1,0 +1,28 @@
+alert_id,alert_text,disaster_type,affected_state,source
+C200,Low pressure area over Bay of Bengal likely to intensify and move west-northwestwards,Cyclone,Coastal India,IMD
+C201,Cyclonic circulation over Arabian Sea causing strong winds along the coast,Cyclone,Coastal India,IMD
+C202,Rough sea conditions expected due to developing storm system,Cyclone,Coastal India,IMD
+C203,Deep depression brings gusty winds and heavy rainfall to coastal districts,Cyclone,Coastal India,IMD
+C204,Fishermen advised to remain ashore as adverse marine conditions prevail,Cyclone,Coastal India,IMD
+C205,Storm system intensifies with heavy rain bands affecting coastal regions,Cyclone,Coastal India,IMD
+F206,River water levels continue to rise following persistent monsoon rainfall,Flood,India,NDMA
+F207,Flooding reported in low-lying areas after overnight heavy rain,Flood,India,NDMA
+F208,Inundation observed in several districts as embankments overflow,Flood,India,NDMA
+F209,Waterlogging disrupts transport and daily activities in urban areas,Flood,India,NDMA
+F210,Dam authorities release excess water due to high inflow,Flood,India,NDMA
+F211,Flood alert issued as rivers approach danger mark,Flood,India,NDMA
+E212,Seismic tremors felt across hill districts during early morning hours,Earthquake,Himalayan Region,GDACS
+E213,Moderate earthquake recorded in the Himalayan region with no damage,Earthquake,Himalayan Region,GDACS
+E214,Earthquake activity detected near the Indo-Nepal border,Earthquake,Himalayan Region,GDACS
+E215,Mild shaking reported by residents following seismic event,Earthquake,Himalayan Region,GDACS
+E216,Aftershocks observed after initial earthquake occurrence,Earthquake,Himalayan Region,GDACS
+H217,Temperatures remain significantly above normal across several districts,Heatwave,India,IMD
+H218,Heatwave conditions persist with high daytime temperatures,Heatwave,India,IMD
+H219,Heat stress advisory issued for vulnerable populations,Heatwave,India,IMD
+H220,Extreme heat conditions raise health concerns,Heatwave,India,IMD
+H221,Prolonged hot weather continues across inland regions,Heatwave,India,IMD
+L222,Slope failure reported in hilly areas after continuous rainfall,Landslide,Hilly Region,NDMA
+L223,Landslide incidents disrupt road connectivity in mountainous regions,Landslide,Hilly Region,NDMA
+L224,Debris flow blocks highways following heavy rain,Landslide,Hilly Region,NDMA
+L225,Rockfall reported in hill district after prolonged precipitation,Landslide,Hilly Region,NDMA
+L226,Mudslide affects remote villages during monsoon period,Landslide,Hilly Region,NDMA

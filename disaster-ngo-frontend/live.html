@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Live Disaster Alerts – NGO Decision Support</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <!-- Marker Cluster -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    #map {
+      height: 60vh;
+    }
+
+    .panel {
+      padding: 12px;
+      border-top: 2px solid #ddd;
+    }
+
+    .live {
+      color: green;
+      font-weight: bold;
+    }
+
+    .warn {
+      color: red;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 6px;
+    }
+
+    /* TABLE SAFETY */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      min-width: 600px;
+    }
+
+    th, td {
+      padding: 6px;
+      border: 1px solid #ccc;
+      font-size: 13px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f2f2f2;
+    }
+
+    /* MOBILE FIXES ONLY */
+    @media (max-width: 768px) {
+      #map {
+        height: 50vh;
+      }
+
+      body {
+        font-size: 13px;
+      }
+
+      button {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div class="panel">
+  <h3>Live Alert Mode</h3>
+  <button onclick="loadLiveAlerts()">Fetch Live Alerts</button>
+  <button onclick="goToDemo()">Go to Demo Mode</button>
+  <div id="status"></div>
+  <div id="alerts"></div>
+</div>
+
+<div class="panel">
+  <h3>Recommended NGOs (Distance-Based)</h3>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>NGO Name</th>
+          <th>District</th>
+          <th>Distance (km)</th>
+          <th>Score</th>
+          <th>Darpan ID</th>
+        </tr>
+      </thead>
+      <tbody id="ngoTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+/* ---------------- MAP SETUP ---------------- */
+
+const map = L.map("map").setView([20.5, 78.9], 4);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap contributors"
+}).addTo(map);
+
+const ngoCluster = L.markerClusterGroup();
+map.addLayer(ngoCluster);
+
+let alertLayer = null;
+
+/* ---------------- HELPERS ---------------- */
+
+function severityColor(sev) {
+  return {
+    Extreme: "#8B0000",
+    High: "#FF4500",
+    Medium: "#FFA500",
+    Low: "#FFD700"
+  }[sev] || "#999";
+}
+
+function clearAll() {
+  ngoCluster.clearLayers();
+  if (alertLayer) map.removeLayer(alertLayer);
+  document.getElementById("alerts").innerHTML = "";
+  document.getElementById("ngoTable").innerHTML = "";
+}
+
+/* ---------------- LIVE ALERTS ---------------- */
+
+function loadLiveAlerts() {
+  clearAll();
+
+  document.getElementById("status").innerHTML =
+    `<p class="live">Fetching live disaster alerts…</p>`;
+
+  fetch("http://127.0.0.1:8000/alerts/process", { method: "POST" })
+    .then(r => r.json())
+    .then(data => {
+
+      if (!data.results || !data.results.length) {
+        document.getElementById("status").innerHTML =
+          `<p class="warn">No live alerts available</p>`;
+        return;
+      }
+
+      document.getElementById("status").innerHTML =
+        `<p class="live">Live alerts processed successfully</p>`;
+
+      data.results.forEach((item, idx) => {
+        const i = item.interpretation;
+
+        document.getElementById("alerts").innerHTML += `
+          <hr>
+          <b>Alert ${idx + 1}</b><br>
+          ${item.alert_text}<br>
+          <b>Type:</b> ${i.disaster_type}<br>
+          <b>Region:</b> ${i.region}<br>
+          <b>Severity:</b> ${i.severity}
+        `;
+
+        if (i.coordinates) {
+          alertLayer = L.circle(
+            [i.coordinates.lat, i.coordinates.lon],
+            {
+              radius: 50000,
+              color: severityColor(i.severity),
+              fillOpacity: 0.4
+            }
+          ).addTo(map);
+
+          map.setView([i.coordinates.lat, i.coordinates.lon], 6);
+
+          fetch("http://127.0.0.1:8000/recommend/ngos/live", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(i.coordinates)
+          })
+          .then(r => r.json())
+          .then(renderNGOs);
+        }
+      });
+    })
+    .catch(() => {
+      document.getElementById("status").innerHTML =
+        `<p class="warn">Error fetching live alerts</p>`;
+    });
+}
+
+/* ---------------- NGO RENDER ---------------- */
+
+function renderNGOs(data) {
+  const tbody = document.getElementById("ngoTable");
+  tbody.innerHTML = "";
+
+  data.features.forEach((f, i) => {
+    const p = f.properties;
+
+    ngoCluster.addLayer(
+      L.geoJSON(f, {
+        pointToLayer: (feat, latlng) =>
+          L.marker(latlng).bindPopup(
+            `<b>${p.name}</b><br>
+             District: ${p.district}<br>
+             Distance: ${p.distance_km} km<br>
+             Score: ${p.score}<br>
+             Darpan ID: ${p.darpan_id || "—"}`
+          )
+      })
+    );
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${p.name}</td>
+        <td>${p.district}</td>
+        <td>${p.distance_km}</td>
+        <td>${p.score}</td>
+        <td>${p.darpan_id || "—"}</td>
+      </tr>`;
+  });
+}
+
+/* ---------------- NAV ---------------- */
+
+function goToDemo() {
+  window.location.href = "http://127.0.0.1:5500/index.html";
+}
+</script>
+
+</body>
+</html>

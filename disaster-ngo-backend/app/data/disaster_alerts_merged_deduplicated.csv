@@ -1,0 +1,67 @@
+alert_id,alert_text,disaster_type,affected_state,source
+1,Red alert issued for Tropical Cyclone Dana-24 with potential severe impact over eastern coastal regions of India,Cyclone,Odisha,GDACS
+2,Orange alert issued for Tropical Cyclone One-25 indicating possible cyclone development affecting Indian coastal areas,Cyclone,Tamil Nadu,GDACS
+3,Orange alert for Tropical Cyclone Montha-25 with possible impact over Bay of Bengal coastal regions,Cyclone,Andhra Pradesh,GDACS
+4,Red alert issued for severe flooding reported in multiple regions of India,Flood,Assam,GDACS
+5,Orange alert issued for Tropical Cyclone Fengal-24 affecting Bay of Bengal and nearby Indian coast,Cyclone,West Bengal,GDACS
+6,Orange alert for Tropical Cyclone Ditwah-25 over the Bay of Bengal with potential impact on eastern India,Cyclone,Odisha,GDACS
+7,Orange alert issued for flooding in parts of India due to intense rainfall,Flood,Bihar,GDACS
+8,Orange alert for moderate earthquake of magnitude 5.5 reported in India,Earthquake,Uttarakhand,GDACS
+9,Depression over the Arabian Sea during late May 2025 with possible weather impact on western India,Cyclone,Gujarat,IMD
+10,Deep depression over the Bay of Bengal during May 2025 affecting eastern coastal regions,Cyclone,Odisha,IMD
+11,Depression over southeast Gangetic West Bengal and adjoining regions causing heavy rainfall,Flood,West Bengal,IMD
+12,Depression over North Rajasthan leading to heavy rainfall and localized flooding,Flood,Rajasthan,IMD
+13,Land depression over Southeast Uttar Pradesh causing persistent rainfall,Flood,Uttar Pradesh,IMD
+14,Depression over Northwest Bay of Bengal affecting south Odisha and north Andhra Pradesh coasts,Cyclone,Andhra Pradesh,IMD
+15,Deep depression over north Gujarat and adjoining southwest Rajasthan,Flood,Gujarat,IMD
+16,Severe cyclonic storm Shakhti over the Arabian Sea with potential impact on western India,Cyclone,Maharashtra,IMD
+17,Depression over Southeast Arabian Sea during late October 2025,Cyclone,Kerala,IMD
+18,Severe cyclonic storm Montha over the Southeast Bay of Bengal affecting eastern coast,Cyclone,Tamil Nadu,IMD
+19,Cyclonic storm Ditwah over the Bay of Bengal with expected coastal impact,Cyclone,Odisha,IMD
+20,Severe cyclonic storm Remal over the Bay of Bengal impacting eastern Indian states,Cyclone,West Bengal,IMD
+21,Deep depression over Jharkhand causing heavy rainfall and flood-like conditions,Flood,Jharkhand,IMD
+22,Cyclonic storm Asna over the Arabian Sea affecting western coastal regions,Cyclone,Gujarat,IMD
+23,Severe cyclonic storm Dana impacting coastal regions of eastern India,Cyclone,Odisha,IMD
+24,Cyclonic storm Fengal over the Bay of Bengal during late November 2024,Cyclone,Tamil Nadu,IMD
+25,Depression over westcentral Bay of Bengal off Andhra Pradesh coast,Cyclone,Andhra Pradesh,IMD
+26,Moderate earthquake of magnitude 5.7 recorded in central Nepal,Earthquake,Nepal,GDACS
+27,Seismic tremors felt across northern India following regional earthquake activity,Earthquake,Uttarakhand,NDMA
+28,Earthquake reported near Himalayan region with no immediate damage,Earthquake,Himachal Pradesh,GDACS
+29,Low intensity seismic event detected near Indo-Nepal border,Earthquake,Bihar,IMD
+30,Residents experience mild shaking due to early morning earthquake,Earthquake,Sikkim,GDACS
+31,Orange flood alert issued due to rising river levels in multiple districts,Flood,India,GDACS
+32,Red flood alert declared following heavy rainfall and river overflow,Flood,India,GDACS
+33,Flash flooding reported in low lying areas after continuous monsoon rains,Flood,Assam,NDMA
+34,Severe flooding affects urban and rural areas across the state,Flood,Bihar,NDMA
+35,Flood situation worsens as dam releases excess water,Flood,Odisha,State Authority
+36,Extremely Severe Cyclonic Storm MOCHA formed over the Bay of Bengal,Cyclone,Bay of Bengal,IMD
+37,Severe Cyclonic Storm BIPARJOY intensifies over Arabian Sea,Cyclone,Arabian Sea,IMD
+38,Cyclonic storm ASANI moves northwards causing strong winds,Cyclone,Andhra Pradesh,IMD
+39,Deep depression over Bay of Bengal likely to intensify into cyclone,Cyclone,Bay of Bengal,IMD
+40,Cyclone Mandous makes landfall with heavy rainfall and gusty winds,Cyclone,Tamil Nadu,IMD
+41,Heatwave conditions prevail as temperatures exceed seasonal norms,Heatwave,Rajasthan,IMD
+42,Severe heatwave alert issued for multiple districts,Heatwave,Telangana,IMD
+43,Prolonged high temperatures raise heat stress concerns,Heatwave,Maharashtra,NDMA
+44,Landslide reported in hilly region following continuous rainfall,Landslide,Kerala,NDMA
+45,Slope failure blocks roads in mountainous area after heavy rain,Landslide,Uttarakhand,NDMA
+46,Moderate earthquake of magnitude 5.2 recorded near Indo-Nepal border,Earthquake,Nepal,GDACS
+47,Seismic tremors felt in northeastern states after regional earthquake,Earthquake,Assam,NDMA
+48,Mild earthquake detected in Himalayan region with no damage reported,Earthquake,Uttarakhand,GDACS
+49,Earthquake activity recorded in the northern seismic zone,Earthquake,Himachal Pradesh,IMD
+50,Low intensity seismic event observed during early morning hours,Earthquake,Sikkim,GDACS
+51,Orange flood alert issued as river levels rise due to persistent rainfall,Flood,Uttar Pradesh,GDACS
+52,Red flood warning declared following overflow of major rivers,Flood,Bihar,GDACS
+53,Flood situation worsens in low-lying districts after continuous rain,Flood,West Bengal,NDMA
+54,Waterlogging reported across urban areas after heavy monsoon showers,Flood,Maharashtra,NDMA
+55,Flood alert issued due to sudden release of water from reservoirs,Flood,Odisha,State Authority
+56,Depression over Bay of Bengal likely to intensify into cyclonic storm,Cyclone,Bay of Bengal,IMD
+57,Severe cyclonic storm moves northwards causing strong winds and rain,Cyclone,Odisha,IMD
+58,Very severe cyclonic storm approaches coastal areas with heavy rainfall,Cyclone,Tamil Nadu,IMD
+59,Cyclonic circulation over Arabian Sea causes adverse weather conditions,Cyclone,Arabian Sea,IMD
+60,Deep depression over sea region brings gusty winds and rough seas,Cyclone,Arabian Sea,IMD
+61,Heatwave alert issued as maximum temperatures cross warning thresholds,Heatwave,Rajasthan,IMD
+62,Prolonged heatwave conditions continue across several inland districts,Heatwave,Telangana,IMD
+63,High temperature conditions raise health advisories for vulnerable groups,Heatwave,Madhya Pradesh,NDMA
+64,Landslide incidents reported in hilly areas after prolonged rainfall,Landslide,Himachal Pradesh,NDMA
+65,Slope instability triggers landslide blocking mountain roads,Landslide,Uttarakhand,NDMA
+66,Heavy rainfall causes landslide in remote hill village,Landslide,Arunachal Pradesh,NDMA

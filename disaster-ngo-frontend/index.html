@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Disaster–NGO Decision Support System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    #map {
+      height: 60vh;
+    }
+
+    .panel {
+      padding: 12px;
+      border-top: 2px solid #ddd;
+    }
+
+    h3 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 10px;
+      border-collapse: collapse;
+      min-width: 650px;
+    }
+
+    th, td {
+      padding: 6px;
+      border: 1px solid #ccc;
+      font-size: 13px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f2f2f2;
+    }
+
+    /* 🔹 MAP LEGEND */
+    .legend {
+      background: white;
+      padding: 8px 10px;
+      line-height: 18px;
+      font-size: 13px;
+      border-radius: 4px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    }
+
+    .legend i {
+      width: 14px;
+      height: 14px;
+      float: left;
+      margin-right: 6px;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+      #map {
+        height: 50vh;
+      }
+
+      body {
+        font-size: 13px;
+      }
+
+      h3 {
+        font-size: 15px;
+      }
+
+      button {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- 🗺️ MAP -->
+<div id="map"></div>
+
+<!-- 📋 NGO TABLE -->
+<div class="panel">
+  <h3 id="tableTitle">Select a disaster region to view NGO recommendations</h3>
+  <button onclick="downloadCSV()" id="csvBtn" disabled>Download CSV</button>
+
+  <div class="table-wrapper">
+    <table id="ngoTable">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>NGO Name</th>
+          <th>Matched Sectors</th>
+          <th>District</th>
+          <th>Distance (km)</th>
+          <th>Score</th>
+          <th>Darpan ID</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+/* ---------------- MAP SETUP ---------------- */
+
+const map = L.map("map").setView([15.9, 80.7], 7);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap contributors"
+}).addTo(map);
+
+const ngoCluster = L.markerClusterGroup();
+map.addLayer(ngoCluster);
+
+/* ---------------- SEVERITY LEGEND ---------------- */
+
+const legend = L.control({ position: "bottomright" });
+
+legend.onAdd = function () {
+  const div = L.DomUtil.create("div", "legend");
+  div.innerHTML = `
+    <b>Disaster Severity</b><br>
+    <i style="background:#8B0000"></i> Extreme<br>
+    <i style="background:#FF4500"></i> High<br>
+    <i style="background:#FFA500"></i> Medium<br>
+    <i style="background:#FFD700"></i> Low
+  `;
+  return div;
+};
+
+legend.addTo(map);
+
+let selectedDisasterId = null;
+
+function getSeverityColor(severity) {
+  switch (severity) {
+    case "Extreme": return "#8B0000";
+    case "High": return "#FF4500";
+    case "Medium": return "#FFA500";
+    case "Low": return "#FFD700";
+    default: return "#999999";
+  }
+}
+
+/* ---------------- LOAD DISASTERS ---------------- */
+
+fetch("http://127.0.0.1:8000/disasters")
+  .then(res => res.json())
+  .then(data => {
+    const disasterLayer = L.geoJSON(data, {
+      style: f => ({
+        color: getSeverityColor(f.properties.severity),
+        weight: 2,
+        fillOpacity: 0.4
+      }),
+      onEachFeature: (f, layer) => {
+        const p = f.properties;
+        layer.bindPopup(
+          `<b>${p.title}</b><br>
+           Type: ${p.disaster_type}<br>
+           Severity: ${p.severity}<br>
+           <i>Click region to recommend NGOs</i>`
+        );
+        layer.on("click", () => loadNGOsForDisaster(p.id, p.title));
+      }
+    }).addTo(map);
+
+    map.fitBounds(disasterLayer.getBounds());
+  });
+
+/* ---------------- LOAD NGOs ---------------- */
+
+function loadNGOsForDisaster(disasterId, title) {
+  selectedDisasterId = disasterId;
+  ngoCluster.clearLayers();
+
+  fetch(`http://127.0.0.1:8000/recommend/ngos/${disasterId}`)
+    .then(res => res.json())
+    .then(data => {
+
+      document.getElementById("tableTitle").innerText =
+        `Top NGO Recommendations for: ${title}`;
+
+      document.getElementById("csvBtn").disabled = false;
+
+      ngoCluster.addLayer(
+        L.geoJSON(data.ngos, {
+          pointToLayer: (f, latlng) => L.marker(latlng),
+          onEachFeature: (f, layer) => {
+            const p = f.properties;
+            layer.bindPopup(
+              `<b>${p.name}</b><br>
+               District: ${p.district}<br>
+               Distance: ${p.distance_km} km<br>
+               Score: ${p.score}`
+            );
+          }
+        })
+      );
+
+      const tbody = document.querySelector("#ngoTable tbody");
+      tbody.innerHTML = "";
+
+      data.ngos.features.forEach((f, i) => {
+        const p = f.properties;
+        tbody.innerHTML += `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${p.name}</td>
+            <td>${p.matched_sectors || "—"}</td>
+            <td>${p.district}</td>
+            <td>${p.distance_km}</td>
+            <td>${p.score}</td>
+            <td>${p.darpan_id || "—"}</td>
+          </tr>
+        `;
+      });
+    });
+}
+
+/* ---------------- CSV ---------------- */
+
+function downloadCSV() {
+  if (!selectedDisasterId) return;
+  window.location.href =
+    `http://127.0.0.1:8000/recommend/ngos/${selectedDisasterId}/export`;
+}
+</script>
+
+</body>
+</html>

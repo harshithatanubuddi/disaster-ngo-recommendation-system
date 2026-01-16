@@ -1,0 +1,72 @@
+[
+  {
+    "timestamp": "2026-01-06T16:09:28.929874",
+    "event_type": "AUTO_RECOMMENDATION",
+    "payload": {
+      "version": {
+        "decision_version": "v1",
+        "source": "ml"
+      },
+      "alert_text": "Severe cyclonic storm with gale winds and very rough sea conditions affecting Odisha coast",
+      "predicted_type": "Severe Cyclonic Storm",
+      "confidence": 0.969,
+      "severity_level": "High",
+      "severity_score": 0.8,
+      "regions": [
+        "Odisha"
+      ],
+      "ranked_ngos": [
+        {
+          "ngo": "Red Cross",
+          "score": 1.0,
+          "reasons": [
+            "Severity alignment",
+            "Regional presence"
+          ]
+        },
+        {
+          "ngo": "SEEDS India",
+          "score": 1.0,
+          "reasons": [
+            "Severity alignment",
+            "Regional presence"
+          ]
+        },
+        {
+          "ngo": "CARE India",
+          "score": 1.0,
+          "reasons": [
+            "Severity alignment",
+            "Regional presence"
+          ]
+        },
+        {
+          "ngo": "Goonj",
+          "score": 0.6,
+          "reasons": []
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2026-01-06T16:15:55.104950",
+    "event_type": "HUMAN_OVERRIDE",
+    "payload": {
+      "version": {
+        "decision_version": "v2",
+        "source": "human"
+      },
+      "alert_text": "Severe cyclonic storm with gale winds and very rough sea conditions affecting Odisha coast",
+      "original_prediction": "Severe Cyclonic Storm",
+      "overridden_prediction": "Very Severe Cyclonic Storm",
+      "overridden_severity": "Extreme",
+      "overridden_ngos": [
+        "Red Cross",
+        "NDRF",
+        "Odisha SDRF"
+      ],
+      "reviewer": "District Collector, Odisha",
+      "reason": "IMD evening bulletin upgraded cyclone intensity based on satellite imagery"
+    }
+  }
+]
