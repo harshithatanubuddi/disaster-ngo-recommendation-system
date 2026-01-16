@@ -163,7 +163,7 @@ function loadLiveAlerts() {
   document.getElementById("status").innerHTML =
     `<p class="live">Fetching live disaster alerts…</p>`;
 
-  fetch("http://127.0.0.1:8000/alerts/process", { method: "POST" })
+  fetch("https://disaster-ngo-recommendation-system.onrender.com/alerts/process", { method: "POST" })
     .then(r => r.json())
     .then(data => {
 
@@ -200,7 +200,7 @@ function loadLiveAlerts() {
 
           map.setView([i.coordinates.lat, i.coordinates.lon], 6);
 
-          fetch("http://127.0.0.1:8000/recommend/ngos/live", {
+          fetch("https://disaster-ngo-recommendation-system.onrender.com/recommend/ngos/live", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(i.coordinates)
@@ -253,7 +253,7 @@ function renderNGOs(data) {
 /* ---------------- NAV ---------------- */
 
 function goToDemo() {
-  window.location.href = "http://127.0.0.1:5500/index.html";
+  window.location.href = "index.html";
 }
 </script>
 
