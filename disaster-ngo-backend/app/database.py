@@ -1,18 +1,16 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
+# Render / production uses ENV variables, NOT .env files
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if DATABASE_URL is None:
-    raise RuntimeError("DATABASE_URL not found in .env")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
 
 engine = create_engine(
     DATABASE_URL,
-    echo=True   # shows SQL queries (important)
+    echo=False   # turn off SQL logs in production
 )
 
 SessionLocal = sessionmaker(
