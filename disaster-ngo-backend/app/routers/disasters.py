@@ -16,7 +16,7 @@ def get_all_disasters(db: Session = Depends(get_db)):
             disaster_type,
             severity,
             ST_AsGeoJSON(geom) AS geom
-        FROM disasters
+        FROM public.disasters
     """)).fetchall()
 
     features = []
