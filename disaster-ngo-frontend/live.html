@@ -6,11 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
 
   <!-- Marker Cluster -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"
+  />
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
@@ -48,10 +57,8 @@
       margin-right: 6px;
     }
 
-    /* TABLE SAFETY */
     .table-wrapper {
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
     }
 
     table {
@@ -65,7 +72,6 @@
       padding: 6px;
       border: 1px solid #ccc;
       font-size: 13px;
-      text-align: left;
       white-space: nowrap;
     }
 
@@ -73,14 +79,9 @@
       background: #f2f2f2;
     }
 
-    /* MOBILE FIXES ONLY */
     @media (max-width: 768px) {
       #map {
         height: 50vh;
-      }
-
-      body {
-        font-size: 13px;
       }
 
       button {
@@ -105,7 +106,6 @@
 
 <div class="panel">
   <h3>Recommended NGOs (Distance-Based)</h3>
-
   <div class="table-wrapper">
     <table>
       <thead>
@@ -124,9 +124,17 @@
 </div>
 
 <script>
-/* ---------------- MAP SETUP ---------------- */
+/* ================= API BASE ================= */
 
-const map = L.map("map").setView([20.5, 78.9], 4);
+const API_BASE =
+  location.hostname === "localhost" || location.hostname === "127.0.0.1"
+    ? "http://127.0.0.1:8000"
+    : "https://disaster-ngo-recommendation-system.onrender.com";
+
+/* ================= MAP ================= */
+
+const map = L.map("map", { preferCanvas: true })
+  .setView([20.5, 78.9], 4);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap contributors"
@@ -137,7 +145,7 @@ map.addLayer(ngoCluster);
 
 let alertLayer = null;
 
-/* ---------------- HELPERS ---------------- */
+/* ================= HELPERS ================= */
 
 function severityColor(sev) {
   return {
@@ -150,12 +158,15 @@ function severityColor(sev) {
 
 function clearAll() {
   ngoCluster.clearLayers();
-  if (alertLayer) map.removeLayer(alertLayer);
+  if (alertLayer) {
+    map.removeLayer(alertLayer);
+    alertLayer = null;
+  }
   document.getElementById("alerts").innerHTML = "";
   document.getElementById("ngoTable").innerHTML = "";
 }
 
-/* ---------------- LIVE ALERTS ---------------- */
+/* ================= LIVE ALERTS ================= */
 
 function loadLiveAlerts() {
   clearAll();
@@ -163,7 +174,7 @@ function loadLiveAlerts() {
   document.getElementById("status").innerHTML =
     `<p class="live">Fetching live disaster alerts…</p>`;
 
-  fetch("https://disaster-ngo-recommendation-system.onrender.com/alerts/process", { method: "POST" })
+  fetch(`${API_BASE}/alerts/process`, { method: "POST" })
     .then(r => r.json())
     .then(data => {
 
@@ -188,7 +199,12 @@ function loadLiveAlerts() {
           <b>Severity:</b> ${i.severity}
         `;
 
-        if (i.coordinates) {
+        /* 🔒 CRITICAL FIX: STRICT COORD CHECK */
+        if (
+          i.coordinates &&
+          typeof i.coordinates.lat === "number" &&
+          typeof i.coordinates.lon === "number"
+        ) {
           alertLayer = L.circle(
             [i.coordinates.lat, i.coordinates.lon],
             {
@@ -200,13 +216,15 @@ function loadLiveAlerts() {
 
           map.setView([i.coordinates.lat, i.coordinates.lon], 6);
 
-          fetch("https://disaster-ngo-recommendation-system.onrender.com/recommend/ngos/live", {
+          fetch(`${API_BASE}/recommend/ngos/live`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(i.coordinates)
           })
-          .then(r => r.json())
-          .then(renderNGOs);
+            .then(r => r.json())
+            .then(renderNGOs);
+        } else {
+          console.warn("Skipping alert (invalid coordinates)", i.coordinates);
         }
       });
     })
@@ -216,18 +234,19 @@ function loadLiveAlerts() {
     });
 }
 
-/* ---------------- NGO RENDER ---------------- */
+/* ================= NGO RENDER ================= */
 
 function renderNGOs(data) {
   const tbody = document.getElementById("ngoTable");
   tbody.innerHTML = "";
+  ngoCluster.clearLayers();
 
   data.features.forEach((f, i) => {
     const p = f.properties;
 
     ngoCluster.addLayer(
       L.geoJSON(f, {
-        pointToLayer: (feat, latlng) =>
+        pointToLayer: (_, latlng) =>
           L.marker(latlng).bindPopup(
             `<b>${p.name}</b><br>
              District: ${p.district}<br>
@@ -250,7 +269,7 @@ function renderNGOs(data) {
   });
 }
 
-/* ---------------- NAV ---------------- */
+/* ================= NAV ================= */
 
 function goToDemo() {
   window.location.href = "/index.html";
