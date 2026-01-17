@@ -4,6 +4,7 @@ import os
 
 # Render / production uses ENV variables, NOT .env files
 DATABASE_URL = os.getenv("DATABASE_URL")
+print("DATABASE_URL USED BY BACKEND:", DATABASE_URL)
 
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set")
