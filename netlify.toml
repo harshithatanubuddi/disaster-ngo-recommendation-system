@@ -1,4 +1,9 @@
 [build]
-  base = "disaster-ngo-frontend"
-  publish = "."
-  command = ""
+base = "disaster-ngo-frontend"
+publish = "."
+
+[[redirects]]
+from = "/"
+to = "/live.html"
+status = 200
+force = true
