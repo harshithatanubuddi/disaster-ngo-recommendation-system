@@ -38,6 +38,7 @@
       padding: 8px 12px;
       font-size: 14px;
       cursor: pointer;
+      margin-bottom: 8px;
     }
 
     .table-wrapper {
@@ -64,7 +65,6 @@
       background: #f2f2f2;
     }
 
-    /* 🔹 MAP LEGEND */
     .legend {
       background: white;
       padding: 8px 10px;
@@ -87,17 +87,8 @@
         height: 50vh;
       }
 
-      body {
-        font-size: 13px;
-      }
-
-      h3 {
-        font-size: 15px;
-      }
-
       button {
         width: 100%;
-        margin-bottom: 8px;
       }
     }
   </style>
@@ -111,6 +102,15 @@
 <!-- 📋 NGO TABLE -->
 <div class="panel">
   <h3 id="tableTitle">Select a disaster region to view NGO recommendations</h3>
+
+  <!-- ✅ SINGLE GLOBAL DARPAN BUTTON -->
+  <button
+    id="darpanBtn"
+    disabled
+    onclick="window.open('https://ngodarpan.gov.in/#/search-ngo', '_blank')">
+    Verify NGOs on DARPAN
+  </button>
+
   <button onclick="downloadCSV()" id="csvBtn" disabled>Download CSV</button>
 
   <div class="table-wrapper">
@@ -134,7 +134,11 @@
 <script>
 /* ---------------- MAP SETUP ---------------- */
 
+let ngoRequestInProgress = false;
+let selectedDisasterId = null;
+
 const map = L.map("map").setView([15.9, 80.7], 7);
+map.doubleClickZoom.disable();
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap contributors"
@@ -143,10 +147,9 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 const ngoCluster = L.markerClusterGroup();
 map.addLayer(ngoCluster);
 
-/* ---------------- SEVERITY LEGEND ---------------- */
+/* ---------------- LEGEND ---------------- */
 
 const legend = L.control({ position: "bottomright" });
-
 legend.onAdd = function () {
   const div = L.DomUtil.create("div", "legend");
   div.innerHTML = `
@@ -158,19 +161,15 @@ legend.onAdd = function () {
   `;
   return div;
 };
-
 legend.addTo(map);
 
-let selectedDisasterId = null;
-
 function getSeverityColor(severity) {
-  switch (severity) {
-    case "Extreme": return "#8B0000";
-    case "High": return "#FF4500";
-    case "Medium": return "#FFA500";
-    case "Low": return "#FFD700";
-    default: return "#999999";
-  }
+  return {
+    Extreme: "#8B0000",
+    High: "#FF4500",
+    Medium: "#FFA500",
+    Low: "#FFD700"
+  }[severity] || "#999";
 }
 
 /* ---------------- LOAD DISASTERS ---------------- */
@@ -178,6 +177,7 @@ function getSeverityColor(severity) {
 fetch("https://disaster-ngo-recommendation-system.onrender.com/disasters")
   .then(res => res.json())
   .then(data => {
+
     const disasterLayer = L.geoJSON(data, {
       style: f => ({
         color: getSeverityColor(f.properties.severity),
@@ -186,12 +186,15 @@ fetch("https://disaster-ngo-recommendation-system.onrender.com/disasters")
       }),
       onEachFeature: (f, layer) => {
         const p = f.properties;
+
+        // ✅ CORRECT DISASTER POPUP (NO NGO DATA HERE)
         layer.bindPopup(
           `<b>${p.title}</b><br>
            Type: ${p.disaster_type}<br>
            Severity: ${p.severity}<br>
-           <i>Click region to recommend NGOs</i>`
+           <i>Click region to view nearby NGOs</i>`
         );
+
         layer.on("click", () => loadNGOsForDisaster(p.id, p.title));
       }
     }).addTo(map);
@@ -202,6 +205,10 @@ fetch("https://disaster-ngo-recommendation-system.onrender.com/disasters")
 /* ---------------- LOAD NGOs ---------------- */
 
 function loadNGOsForDisaster(disasterId, title) {
+
+  if (ngoRequestInProgress) return;
+  ngoRequestInProgress = true;
+
   selectedDisasterId = disasterId;
   ngoCluster.clearLayers();
 
@@ -213,10 +220,11 @@ function loadNGOsForDisaster(disasterId, title) {
         `Top NGO Recommendations for: ${title}`;
 
       document.getElementById("csvBtn").disabled = false;
+      document.getElementById("darpanBtn").disabled = false;
 
       ngoCluster.addLayer(
         L.geoJSON(data.ngos, {
-          pointToLayer: (f, latlng) => L.marker(latlng),
+          pointToLayer: (_, latlng) => L.marker(latlng),
           onEachFeature: (f, layer) => {
             const p = f.properties;
             layer.bindPopup(
@@ -246,6 +254,9 @@ function loadNGOsForDisaster(disasterId, title) {
           </tr>
         `;
       });
+    })
+    .finally(() => {
+      ngoRequestInProgress = false;
     });
 }
 

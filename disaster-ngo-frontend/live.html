@@ -105,7 +105,14 @@
 </div>
 
 <div class="panel">
-  <h3>Recommended NGOs (Distance-Based)</h3>
+  <h3>
+    Recommended NGOs (Distance-Based)
+    <button
+      style="margin-left:10px"
+      onclick="window.open('https://ngodarpan.gov.in/#/search-ngo', '_blank')">
+      Verify NGOs on DARPAN
+    </button>
+  </h3>
   <div class="table-wrapper">
     <table>
       <thead>
@@ -135,6 +142,8 @@ const API_BASE =
 
 const map = L.map("map", { preferCanvas: true })
   .setView([20.5, 78.9], 4);
+
+map.doubleClickZoom.disable();
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap contributors"
@@ -172,65 +181,53 @@ function loadLiveAlerts() {
   clearAll();
 
   document.getElementById("status").innerHTML =
-    `<p class="live">Fetching live disaster alerts…</p>`;
+    `<p class="live">Fetching live India-relevant alerts…</p>`;
 
-  fetch(`${API_BASE}/alerts/process`, { method: "POST" })
+  fetch(`${API_BASE}/disasters/live`)
     .then(r => r.json())
     .then(data => {
 
-      if (!data.results || !data.results.length) {
+      if (!data.features || !data.features.length) {
         document.getElementById("status").innerHTML =
-          `<p class="warn">No live alerts available</p>`;
+          `<p class="warn">No active live alerts</p>`;
         return;
       }
 
       document.getElementById("status").innerHTML =
-        `<p class="live">Live alerts processed successfully</p>`;
+        `<p class="live">Live alerts loaded</p>`;
 
-      data.results.forEach((item, idx) => {
-        const i = item.interpretation;
+      data.features.forEach((f, idx) => {
+        const p = f.properties;
+        const [lon, lat] = f.geometry.coordinates;
 
         document.getElementById("alerts").innerHTML += `
           <hr>
           <b>Alert ${idx + 1}</b><br>
-          ${item.alert_text}<br>
-          <b>Type:</b> ${i.disaster_type}<br>
-          <b>Region:</b> ${i.region}<br>
-          <b>Severity:</b> ${i.severity}
+          ${p.title}<br>
+          <b>Type:</b> ${p.disaster_type}<br>
+          <b>Severity:</b> ${p.severity}
         `;
 
-        /* 🔒 CRITICAL FIX: STRICT COORD CHECK */
-        if (
-          i.coordinates &&
-          typeof i.coordinates.lat === "number" &&
-          typeof i.coordinates.lon === "number"
-        ) {
-          alertLayer = L.circle(
-            [i.coordinates.lat, i.coordinates.lon],
-            {
-              radius: 50000,
-              color: severityColor(i.severity),
-              fillOpacity: 0.4
-            }
-          ).addTo(map);
+        alertLayer = L.circle([lat, lon], {
+          radius: 50000,
+          color: severityColor(p.severity),
+          fillOpacity: 0.4
+        }).addTo(map);
 
-          map.setView([i.coordinates.lat, i.coordinates.lon], 6);
+        map.setView([lat, lon], 6);
 
-          fetch(`${API_BASE}/recommend/ngos/live`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(i.coordinates)
-          })
-            .then(r => r.json())
-            .then(renderNGOs);
-        } else {
-          console.warn("Skipping alert (invalid coordinates)", i.coordinates);
-        }
+        fetch(`${API_BASE}/recommend/ngos/live`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lat, lon })
+        })
+          .then(r => r.json())
+          .then(renderNGOs);
       });
     })
     .catch(() => {
       document.getElementById("status").innerHTML =
-        `<p class="warn">Error fetching live alerts</p>`;
+        `<p class="warn">Error loading live alerts</p>`;
     });
 }
 
